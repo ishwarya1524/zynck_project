@@ -2,9 +2,9 @@
 
 This is a fullstack project depends on MERN stack that allows users to create, edit and manage dynamic tables
 
-```
-## Features
 
+## Features
+```
 User authentication with JWT
 Create Tables with dynamic columns (text,dropdown,checkbox,etc.,)
 Add,edit,delete rows
