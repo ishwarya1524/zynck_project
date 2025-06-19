@@ -17,6 +17,7 @@ router.post("/table", authMiddleware, async (req, res) => {
     });
 
     res.json(table);
+    console.log("Table created successfully!")
   } catch (err) {
     res.status(500).json({ error: "Failed to create table" });
   }
@@ -125,6 +126,9 @@ router.put("/table/:id",authMiddleware,async(req,res)=>{
 })
 
 router.get("/table/:id",authMiddleware,async(req,res)=>{
+  console.log("Route hit!");
+  console.log("User ID:", req.userId);
+  console.log("Table ID:", req.params.id);
   try{
     const table=await Table.findOne({
       _id:req.params.id,
