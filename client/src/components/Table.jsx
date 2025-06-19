@@ -36,7 +36,7 @@ function App(){
       const colIndex = table.columns.indexOf(col);
       const type = columnTypes[colIndex];
     
-      if (!value.trim()) return true; // Allow empty
+      if (!value.trim()) return true;
     
       switch (type.toLowerCase()) {
         case "number":
@@ -48,11 +48,11 @@ function App(){
         case "date":
           return !isNaN(Date.parse(value));
         case "telephone":
-          return /^\d{10}$/.test(value); // basic mobile number
+          return /^\d{10}$/.test(value); 
         case "time":
-          return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value); // 24-hr format
+          return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value); 
         case "password":
-          return value.length >= 6; // minimum length
+          return value.length >= 6;
         case "radio":
         case "dropdown":
         case "text":

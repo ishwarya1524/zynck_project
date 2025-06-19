@@ -17,7 +17,7 @@ const TableView = ({
   handlesaveTable,
   columnTypes,
   setColumnTypes,
-  showActions = true, // default is true
+  showActions = true,
 }) => {
   const [showoptionmodel,setShowoptionmodel]=useState(false)
   const [selectedcolumnindex,setselectedcolumnindex]=useState(null);

@@ -4,7 +4,7 @@ const Table = require("../models/Table");
 const Row=require("../models/Row")
 const authMiddleware = require("../middleware/authMiddleware");
 
-// ✅ Create a new table
+// Create a new table
 router.post("/table", authMiddleware, async (req, res) => {
   try {
     const { tableName, columns } = req.body;
@@ -33,7 +33,7 @@ router.get("/tables", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Update table details
+//Update table details
 router.put("/table/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
@@ -54,7 +54,7 @@ router.put("/table/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Delete a table
+//Delete a table
 router.delete("/table/:id", authMiddleware, async (req, res) => {
   try {
     const deleted = await Table.findOneAndDelete({
@@ -92,6 +92,7 @@ router.post('/tables/:id/rows',async(req,res)=>{
     }
 });
 
+//modifying row
 router.put("/tables/:tableId/rows/:rowId",async(req,res)=>{
   try{
       const updatedRow=await Row.findByIdAndUpdate(
@@ -125,10 +126,8 @@ router.put("/table/:id",authMiddleware,async(req,res)=>{
     }
 })
 
+//getting full table
 router.get("/table/:id",authMiddleware,async(req,res)=>{
-  console.log("Route hit!");
-  console.log("User ID:", req.userId);
-  console.log("Table ID:", req.params.id);
   try{
     const table=await Table.findOne({
       _id:req.params.id,
@@ -146,6 +145,8 @@ router.get("/table/:id",authMiddleware,async(req,res)=>{
     res.status(500).json({error:"server error"});
   }
 })
+
+//deleting single row
 router.delete("/tables/:tableId/rows/:rowId",async(req,res)=>{
   try{
       await Row.findByIdAndDelete(req.params.rowId);
@@ -156,6 +157,7 @@ router.delete("/tables/:tableId/rows/:rowId",async(req,res)=>{
   }
 })
 
+//dEleting entire table
 router.delete('/tables/:id',async(req,res)=>{
   try{
     const table=await Table.findByIdAndDelete(req.params.id);
