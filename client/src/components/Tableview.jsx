@@ -19,13 +19,13 @@ const TableView = ({
   setColumnTypes,
   showActions = true,
 }) => {
-  const [showoptionmodel,setShowoptionmodel]=useState(false)
-  const [selectedcolumnindex,setselectedcolumnindex]=useState(null);
-  const [optiontype,setOptionstype]=useState("")
-  const [boxname,setBoxname]=useState("")
-  const [numoptions,setNumberoptions]=useState(0);
-  const [options,setOptions]=useState([])
-  const [columnoptions,setcolumnoptions]=useState({})
+  const [showoptionmodel, setShowoptionmodel] = useState(false);
+  const [selectedcolumnindex, setselectedcolumnindex] = useState(null);
+  const [optiontype, setOptionstype] = useState("");
+  const [boxname, setBoxname] = useState("");
+  const [numoptions, setNumberoptions] = useState(0);
+  const [options, setOptions] = useState([]);
+  const [columnoptions, setcolumnoptions] = useState({});
 
   return (
     <div className="flex flex-col justify-center min-h-screen items-center overflow-x-auto  w-full">
@@ -40,19 +40,22 @@ const TableView = ({
               {table.columns.map((col, idx) => (
                 <th key={idx} className="border-2 border-blue-900 p-2">
                   {col}
-                  <select className=" rounded  ml-3 bg-gray-200 p-2" value={columnTypes[idx]} onChange={(e)=>{
-                    const value=e.target.value
-                    const updated=[...columnTypes];
-                    updated[idx]=e.target.value;
-                    setColumnTypes(updated);
+                  <select
+                    className=" rounded  ml-3 bg-gray-200 p-2"
+                    value={columnTypes[idx]}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const updated = [...columnTypes];
+                      updated[idx] = e.target.value;
+                      setColumnTypes(updated);
 
-                    if(value ==="Dropdown" || value==="Radio"){
-                      setselectedcolumnindex(idx);
-                      setOptionstype(value);
-                      setShowoptionmodel(true);
-                    }
-
-                  }}>
+                      if (value === "Dropdown" || value === "Radio") {
+                        setselectedcolumnindex(idx);
+                        setOptionstype(value);
+                        setShowoptionmodel(true);
+                      }
+                    }}
+                  >
                     <option value="Text">Text</option>
                     <option value="Number">Number</option>
                     <option value="Email">Email</option>
@@ -62,7 +65,8 @@ const TableView = ({
                     <option value="Dropdown">Dropdown</option>
                     <option value="Radio">Radio</option>
                     <option value="Password">Password</option>
-                    <option value="">Time</option>
+                    <option value="Time">Time</option>
+                    <option value="Color">Color</option>
                   </select>
                 </th>
               ))}
@@ -78,19 +82,46 @@ const TableView = ({
                 {table.columns.map((col, i) => (
                   <td key={i} className="border border-blue-900 p-2">
                     {editingRow === idx ? (
-                      columnoptions[i] && (columnTypes[i] === "Dropdown" || columnTypes[i] === "Radio") ? (
-                        <select value={editedRow[col] || ""} onChange={(e)=>handlechangeeditedrow(col,e.target.value)}
+                      columnoptions[i] && columnTypes[i] === "Dropdown" ? (
+                        <select
+                          value={editedRow[col] || ""}
+                          onChange={(e) => handlechangeeditedrow(col, e.target.value)}
                           className="w-full p-1 border border-black"
                         >
                           <option value="">Select</option>
-                          {columnoptions[i].options.map((opt,index)=>(
-                            <option key={index} value={opt}>{opt}</option>
+                          {columnoptions[i].options.map((opt, index) => (
+                            <option key={index} value={opt}>
+                              {opt}
+                            </option>
                           ))}
                         </select>
+                      ) : columnoptions[i] && columnTypes[i] === "Radio" ? (
+                        <div className="flex flex-col">
+                          {columnoptions[i].options.map((opt, index) => (
+                            <label key={index} className="flex items-center gap-1">
+                              <input
+                                type="radio"
+                                name={`edit-${col}`}
+                                value={opt}
+                                checked={editedRow[col] === opt}
+                                onChange={(e) => handlechangeeditedrow(col, e.target.value)}
+                              />
+                              {opt}
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <input
+                        type={columnTypes[i]==="Date"?"date":columnTypes[i]==="Time"?"time":columnTypes[i]==="Color"?"color":"text"}
+                        value={editedRow[col] || ""}
+                        onChange={(e) => handlechangeeditedrow(col, e.target.value)}
+                        className={`${
+                        columnTypes[i]==="Color"
+                        ?"w-full h-7 p-0 rounded-full cursor-pointer "
+                        :"w-full p-2 border border-black"}`}
+                      />
+                      )
                     ) : (
-                      <input value={editedRow[col] || ""} onChange={(e)=>handlechangeeditedrow(col,e.target.value)} className="w-full p-1 border border-black"/>
-                    )):
-                    (
                       row.rowData[col] || ""
                     )}
                   </td>
@@ -138,7 +169,7 @@ const TableView = ({
               <tr>
                 {table.columns.map((col, idx) => (
                   <td key={idx}>
-                    {columnoptions[idx] && (columnTypes[idx] === "Dropdown" || columnTypes[idx] === "Radio") ? (
+                    {columnoptions[idx] && columnTypes[idx] === "Dropdown" ? (
                       <select
                         value={newRow[col] || ""}
                         onChange={(e) => handleChangeNewRow(col, e.target.value)}
@@ -146,14 +177,35 @@ const TableView = ({
                       >
                         <option value="">Select</option>
                         {columnoptions[idx].options.map((opt, index) => (
-                          <option key={index} value={opt}>{opt}</option>
+                          <option key={index} value={opt}>
+                            {opt}
+                          </option>
                         ))}
                       </select>
+                    ) : columnoptions[idx] && columnTypes[idx] === "Radio" ? (
+                      <div className="flex flex-col">
+                        {columnoptions[idx].options.map((opt, index) => (
+                          <label key={index} className="flex items-center gap-1">
+                            <input
+                              type="radio"
+                              name={`new-${col}`}
+                              value={opt}
+                              checked={newRow[col] === opt}
+                              onChange={(e) => handleChangeNewRow(col, e.target.value)}
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
                     ) : (
                       <input
+                        type={columnTypes[idx]==="Date"?"date":columnTypes[idx]==="Time"?"time":columnTypes[idx]==="Color"?"color":"text"}
                         value={newRow[col] || ""}
                         onChange={(e) => handleChangeNewRow(col, e.target.value)}
-                        className="w-full p-1 border border-black"
+                        className={`${
+                        columnTypes[idx]==="Color"
+                        ?"w-full h-7 p-0 rounded-full cursor-pointer "
+                        :"w-full p-2 border border-black"}`}
                       />
                     )}
                   </td>
@@ -185,84 +237,76 @@ const TableView = ({
             </button>
           </div>
         )}
+
         {showoptionmodel && (
-  <div className="fixed inset-0 backdrop-blur-[5px] bg-opacity-40 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-xl w-96 shadow-lg space-y-4">
-      <h3 className="text-xl font-bold text-center">
-        {optiontype} Options Configuration
-      </h3>
+          <div className="fixed inset-0 backdrop-blur-[5px] bg-opacity-40 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-xl w-96 shadow-lg space-y-4">
+              <h3 className="text-xl font-bold text-center">
+                {optiontype} Options Configuration
+              </h3>
 
-      <div>
-        <label className="font-semibold">Box Name:</label>
-        <input
-          type="text"
-          className="w-full border p-2 rounded"
-          value={boxname}
-          onChange={(e) => setBoxname(e.target.value)}
-        />
-      </div>
+              
 
-      <div>
-        <label className="font-semibold">Number of Options:</label>
-        <input
-          type="number"
-          className="w-full border p-2 rounded"
-          value={numoptions}
-          onChange={(e) => {
-            const n = parseInt(e.target.value);
-            setNumberoptions(n);
-            setOptions(Array(n).fill(""));
-          }}
-        />
-      </div>
+              <div>
+                <label className="font-semibold">Number of Options:</label>
+                <input
+                  type="number"
+                  className="w-full border p-2 rounded"
+                  value={numoptions}
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value);
+                    setNumberoptions(n);
+                    setOptions(Array(n).fill(""));
+                  }}
+                />
+              </div>
 
-      {options.map((opt, i) => (
-        <div key={i}>
-          <label className="font-semibold">Option {i + 1}:</label>
-          <input
-            type="text"
-            className="w-full border p-2 rounded"
-            value={opt}
-            onChange={(e) => {
-              const newOpts = [...options];
-              newOpts[i] = e.target.value;
-              setOptions(newOpts);
-            }}
-          />
-        </div>
-      ))}
+              {options.map((opt, i) => (
+                <div key={i}>
+                  <label className="font-semibold">Option {i + 1}:</label>
+                  <input
+                    type="text"
+                    className="w-full border p-2 rounded"
+                    value={opt}
+                    onChange={(e) => {
+                      const newOpts = [...options];
+                      newOpts[i] = e.target.value;
+                      setOptions(newOpts);
+                    }}
+                  />
+                </div>
+              ))}
 
-      <div className="flex justify-end gap-4">
-        <button
-          className="bg-red-500 text-white px-4 py-2 rounded"
-          onClick={() => setShowoptionmodel(false)}
-        >
-          Cancel
-        </button>
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={() => {
-            setcolumnoptions((prev) => ({
-              ...prev,
-              [selectedcolumnindex]: {
-                boxName: boxname,
-                options,
-                type: optiontype,
-              },
-            }));
-            setShowoptionmodel(false);
-            setBoxname("");
-            setNumberoptions(0);
-            setOptions([]);
-          }}
-        >
-          Save
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+              <div className="flex justify-end gap-4">
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                  onClick={() => setShowoptionmodel(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  onClick={() => {
+                    setcolumnoptions((prev) => ({
+                      ...prev,
+                      [selectedcolumnindex]: {
+                        boxName: boxname,
+                        options,
+                        type: optiontype,
+                      },
+                    }));
+                    setShowoptionmodel(false);
+                    setBoxname("");
+                    setNumberoptions(0);
+                    setOptions([]);
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

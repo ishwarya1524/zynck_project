@@ -12,6 +12,25 @@ function App(){
     const [editedRow,seteditedRow]=useState({});
     const [columnTypes,setColumnTypes]=useState([]);
     const user=JSON.parse(localStorage.getItem("user"))
+
+    useEffect(()=>{
+      const saved=localStorage.getItem("unsavedTableData");
+      if(saved){
+        const parsed=JSON.parse(saved);
+        setNewRow(parsed.newRow || {});
+        setColumnTypes(parsed.columnTypes || []);
+      }
+    },[]);
+    useEffect(()=>{
+      const handler=(e)=>{
+        if(Object.keys(newRow).some((key)=>newRow[key]?.trim()!=="")){
+          e.preventDefault()
+          e.returnValue="";
+        }
+      }
+      window.addEventListener("beforeunload",handler);
+      return ()=>window.removeEventListener("beforeunload",handler);
+    },[newRow]);
     const handleCreateTable=async()=>{
         try{
             const res=await axios.post('http://localhost:5000/table',{
@@ -44,18 +63,13 @@ function App(){
         case "email":
           return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
         case "boolean":
-          return value === "true" || value === "false";
+          return value === "true" || value === "false" || value==="True" || value==="False";
         case "date":
           return !isNaN(Date.parse(value));
         case "telephone":
           return /^\d{10}$/.test(value); 
-        case "time":
-          return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value); 
         case "password":
           return value.length >= 6;
-        case "radio":
-        case "dropdown":
-        case "text":
         default:
           return true;
       }
@@ -96,13 +110,24 @@ function App(){
         const value=editedRow[col] || ""
         if(!validateInput(col,value)){
           alert(`Invalid input for column "${col}" of type "${columnTypes[table.columns.indexOf(col)]}`)
+          return;
         }
       }
       try{
-        const rowId=rows[idx]._id;
+        const currentRow=rows[idx];
+        if(!currentRow || !currentRow._id){
+          console.warn("Trying to save a row without an _id.!");
+          seteditingRow(null);
+          return;
+        }
+        const cleanedRow={}
+        for(let col of table.columns){
+          cleanedRow[col]=editedRow[col] || "";
+
+        }
         const res=await axios.put(
-          `http://localhost:5000/tables/${table._id}/rows/${rowId}`,
-          {rowData:editedRow}
+          `http://localhost:5000/tables/${table._id}/rows/${currentRow._id}`,
+          {rowData:cleanedRow}
         );
         const updataedRow=[...rows];
         updataedRow[idx]=res.data;
@@ -154,6 +179,7 @@ function App(){
 
         })
         alert("table saved successfully")
+        localStorage.removeItem("unsavedTableData");
         setTable(saveres.data);
       }
       catch(err){
