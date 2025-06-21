@@ -1,6 +1,6 @@
 ### WaterTable
 
-This is a fullstack project depends on MERN stack that allows users to create, edit and manage dynamic tables.
+WaterTable is a dynamic fullstack application that is build on the MERN stack that allows users to customize, create , edit and manage flexible data tables with ease. This application supports 10+ different datatypes to work with. This application also supports full control over structure and content
 
 ## Features
 
@@ -14,6 +14,20 @@ Save tables to MongoDb
 Secure APIs with token-based authorization
 Wonderful UI with Tailwindcss
 ```
+
+## Different Datatypes to work with
+
+-> Text
+-> Number
+-> Email
+-> Boolean
+-> Date
+-> Telephone
+-> Dropdown
+-> Radio
+-> Password
+-> Time
+-> Color
 
 ## Tech Stack
 
