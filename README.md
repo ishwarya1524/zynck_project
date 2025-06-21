@@ -1,17 +1,20 @@
 ### WaterTable
 
-This is a fullstack project depends on MERN stack that allows users to create, edit and manage dynamic tables
-
+This is a fullstack project depends on MERN stack that allows users to create, edit and manage dynamic tables.
 
 ## Features
+
 ```
 User authentication with JWT
 Create Tables with dynamic columns (text,dropdown,checkbox,etc.,)
 Add,edit,delete rows
+add, delete columns
+Able to edit already saved Tables
 Save tables to MongoDb
 Secure APIs with token-based authorization
 Wonderful UI with Tailwindcss
 ```
+
 ## Tech Stack
 
 ### Frontend:
@@ -22,6 +25,7 @@ Wonderful UI with Tailwindcss
 - React Router
 
 ### Backend:
+
 - Node.js
 - Express.js
 - MongoDb with Mongoose
@@ -32,7 +36,7 @@ Wonderful UI with Tailwindcss
 ### API Endpoints
 
 | Method | Endpoint        | Description             |
-|--------|-----------------|-------------------------|
+| ------ | --------------- | ----------------------- |
 | POST   | `/register`     | Register a new user     |
 | POST   | `/login`        | Login and get JWT token |
 | GET    | `/tables`       | Get all user tables     |
@@ -40,5 +44,3 @@ Wonderful UI with Tailwindcss
 | POST   | `/table/create` | Create a new table      |
 | PUT    | `/table/:id`    | Update a table          |
 | DELETE | `/table/:id`    | Delete a table          |
-
-  

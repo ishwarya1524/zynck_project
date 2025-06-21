@@ -1,235 +1,254 @@
-import axios from "axios"
-import {useState,useEffect} from "react"
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import TableView from "./Tableview";
 
-function App(){
-    const [tableName,setTableName]=useState('');
-    const [columns,setColumns]=useState([''])
-    const [table,setTable]=useState(null)
-    const [rows,setRows]=useState([])
-    const [newRow,setNewRow]=useState({});
-    const [editingRow,seteditingRow]=useState({});
-    const [editedRow,seteditedRow]=useState({});
+const TableDetail = () => {
+  const { id } = useParams();
+  const [table, setTable] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [newRow, setNewRow] = useState({});
+  const [editedRow, setEditedRow] = useState({});
+  const [editingRow, setEditingRow] = useState(null);
+  const [columnTypes, setColumnTypes] = useState([]);
+  const [editMode, setEditMode] = useState(false);
 
-    const handleCreateTable=async()=>{
-        try{
-            const res=await axios.post('http://localhost:5000/tables',{
-                tableName,
-                columns,
-            });
-            setTable(res.data);
-        }
-        catch(err){
-            console.log("error creating table",err);
-            alert("failed to create table")
-            
-        }
+  useEffect(() => {
+    const fetchTable = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login first!");
+        return;
+      }
+
+      try {
+        const res = await axios.get(`http://localhost:5000/table/${id}`, {
+          headers: { Authorization: `${token}` },
+        });
+        setTable(res.data);
+        setRows(res.data.rows);
+        setColumnTypes(res.data.columnTypes || Array(res.data.columns.length).fill("Text"));
+      } catch (err) {
+        console.error("Error loading table:", err);
+      }
     };
 
-    const handleAddRow=async() =>{
-        if(!table || !table._id) return;
+    fetchTable();
+  }, [id]);
 
-        const hasValues=Object.values(newRow).some(v=>v.trim()!=='');
-        if(!hasValues){
-            alert("fill at least one column");
-            return;
-        }
+  const validateInput = (col, value) => {
+    const colIndex = table.columns.indexOf(col);
+    const type = columnTypes[colIndex];
 
-    try{
-        const res=await axios.post(`http://localhost:5000/tables/${table._id}/rows`,newRow);
-        setRows([...rows,res.data]);
-        setNewRow({});
+    if (!value.trim()) return true;
+
+    switch (type.toLowerCase()) {
+      case "number":
+        return !isNaN(value);
+      case "email":
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      case "boolean":
+        return value === "true" || value === "false" || value === "True" || value === "False";
+      case "date":
+        return !isNaN(Date.parse(value));
+      case "telephone":
+        return /^\d{10}$/.test(value);
+      case "password":
+        return value.length >= 6;
+      default:
+        return true;
     }
-    catch(err){
-        console.error("Error adding row",err);
-        alert("failed to add row:"+ (err.response?.data.error || "unknown error"))        
-    }
-    };
+  };
 
-    const handleEditRow=(idx)=>{
-      seteditingRow(idx);
-      seteditedRow({...rows[idx].rowData});
-    }
+  const handleEditRow = (idx) => {
+    setEditingRow(idx);
+    setEditedRow({ ...rows[idx].rowData });
+  };
 
-    const handlechangeeditedrow=(col,value)=>{
-      seteditedRow((prev)=>({...prev,[col]:value}))
-    }
+  const handleChangeNewRow = (col, value) => {
+    setNewRow({ ...newRow, [col]: value });
+  };
 
-    const handlesaverow=async(idx)=>{
-      try{
-        const rowId=rows[idx]._id;
-        const res=await axios.put(
-          `http://localhost:5000/tables/${table._id}/rows/${rowId}`,
-          {rowData:editedRow}
-        );
-        const updataedRow=[...rows];
-        updataedRow[idx]=res.data;
-        setRows(updataedRow);
-        seteditingRow(null);
-      }
-      catch(err){
-        console.error("Error saving row",err);
-        alert("Failed to save row")
-      }
-    }
+  const handleChangeEditedRow = (col, value) => {
+    setEditedRow({ ...editedRow, [col]: value });
+  };
 
-    const handledetelerow= async(idx)=>{
-      const rowId=rows[idx]._id;
-      try{
-        await axios.delete(`http://localhost:5000/tables/${table._id}/rows/${rowId}`);
-        setRows(rows.filter((_,i)=>i!==idx));
-      }
-      catch(err){
-        console.error("error deleting row",err);
-        alert("failed to delete row")
-        
+  const handleSaveRow = async (idx) => {
+    for (let col of table.columns) {
+      const value = editedRow[col] || "";
+      if (!validateInput(col, value)) {
+        alert(`Invalid input for column "${col}" of type "${columnTypes[table.columns.indexOf(col)]}"`);
+        return;
       }
     }
-
-    const handleChangeNewRow=(col,value)=>{
-        setNewRow({...newRow,[col]:value});
-    };
-    useEffect(()=>{
-        const fetchTableAndRows= async()=>{
-            if(table && table._id){
-                try{
-                    const res=await axios.get(`http://localhost:5000/tables/${table._id}`);
-                    setTable(res.data.table);
-                    setRows(res.data.rows);
-                }
-                catch(err){
-                    console.error("Error fetching rows",err);
-                }
-            }
-        }
-        fetchTableAndRows();
-    },[table?._id]);
-    if (!table) {
-        return (
-          <div className="min-h-screen flex  flex-col justify-center items-center">
-          <div className="flex flex-col justify-center items-center border-2 w-1/2 rounded-md gap-3 shadow-lg">
-            <h2 className="text-blue-500 text-2xl  font-bold mt-3">Create a Table</h2>
-            <input
-              value={tableName}
-              onChange={(e) => setTableName(e.target.value)}
-              placeholder="Table name" className="border-1 w-90 p-3 rounded-sm"
-            />
-            {columns.map((col, idx) => (
-              <div key={idx} className="flex flex-col gap-3">
-                <input
-                  value={col}
-                  onChange={(e) => {
-                    const copy = [...columns];
-                    copy[idx] = e.target.value;
-                    setColumns(copy);
-                  }}
-                  placeholder={`Column ${idx + 1}`} className="border-1 w-90 p-3 rounded-sm"
-                />
-              </div>
-            ))}
-            <button onClick={() => setColumns([...columns, ''])} className="border-2 w-90 p-2 rounded-lg bg-gradient-to-r from-blue-300 to-blue-500">+ Add Column</button>
-            <br /><br />
-            <button onClick={handleCreateTable} className="border-2 w-60 mb-5 p-3 rounded-sm bg-blue-200 hover:bg-blue-500 hover:rounded-full transition-all duration-500">Create Table</button>
-          </div>
-          </div>
-        );
+    try {
+      const currentRow = rows[idx];
+      if (!currentRow || !currentRow._id) {
+        console.warn("Trying to save a row without an _id.!");
+        setEditingRow(null);
+        return;
       }
-    
-      return (
-        <div className="flex flex-col justify-center min-h-screen items-center overflow-x-auto mx-4">
-          <div className="w-full flex flex-col gap-3 justify-evenly">
-            <h2 className="text-blue-400 font-bold text-3xl mb-5 text-center">
-              {table.tableName}
-            </h2>
-            <table className="table-auto border border-collapse w-full">
-              <thead>
-                <tr>
-                  {table.columns.map((col, idx) => (
-                    <th key={idx} className="border-2 border-blue-900 p-2">
-                      {col}
-                    </th>
-                  ))}
-                  <th className="border-2 border-blue-900 p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, idx) => (
-                  <tr key={idx}>
-                    {table.columns.map((col, i) => (
-                      <td key={i} className="border border-blue-900 p-2">
-                        {editingRow === idx ? (
-                          <input
-                            value={editedRow[col] || ""}
-                            onChange={(e) =>
-                              handlechangeeditedrow(col, e.target.value)
-                            }
-                            className="w-full p-1 border border-black"
-                          />
-                        ) : (
-                          row.rowData[col] || ""
-                        )}
-                      </td>
-                    ))}
-                    <td className="p-2">
-                      {editingRow === idx ? (
-                        <>
-                          <button
-                            onClick={() => handlesaverow(idx)}
-                            className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => seteditingRow(null)}
-                            className="bg-blue-800 text-white px-3 py-1 rounded"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => handleEditRow(idx)}
-                            className="bg-blue-400 text-white px-3 py-1 rounded mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handledetelerow(idx)}
-                            className="bg-red-400 px-3 py-1 rounded text-white"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  {table.columns.map((col, idx) => (
-                    <td key={idx}>
-                      <input
-                        value={newRow[col] || ""}
-                        onChange={(e) => handleChangeNewRow(col, e.target.value)}
-                        className="w-full p-1 border border-black"
-                        
-                      />
-                    </td>
-                  ))}
-                  <td>
-                    <button
-                      onClick={handleAddRow}
-                      className="bg-blue-900 px-3 py-1 rounded text-white"
-                    >
-                      + Add Row
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      const cleanedRow = {};
+      for (let col of table.columns) {
+        cleanedRow[col] = editedRow[col] || "";
+      }
+      const res = await axios.put(
+        `http://localhost:5000/tables/${table._id}/rows/${currentRow._id}`,
+        { rowData: cleanedRow }
       );
+      const updatedRows = [...rows];
+      updatedRows[idx] = res.data;
+      setRows(updatedRows);
+      setEditingRow(null);
+    } catch (err) {
+      console.error("Error saving row", err);
+      alert("Failed to save row");
     }
-  
-    
-    export default App;
+  };
+
+  const handleDeleteRow = async (idx) => {
+    const rowId = rows[idx]._id;
+    try {
+      await axios.delete(`http://localhost:5000/tables/${table._id}/rows/${rowId}`);
+      setRows(rows.filter((_, i) => i !== idx));
+    } catch (err) {
+      console.error("error deleting row", err);
+      alert("failed to delete row");
+    }
+  };
+
+  const handleAddRow = async () => {
+    if (!table || !table._id) return;
+    for (let col of table.columns) {
+      const value = newRow[col] || "";
+      if (!validateInput(col, value)) {
+        alert(`Invalid input for column "${col}" of type "${columnTypes[table.columns.indexOf(col)]}"`);
+        return;
+      }
+    }
+    try {
+      const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
+      setRows([...rows, res.data]);
+      setNewRow({});
+    } catch (err) {
+      console.error("Error adding row", err);
+      alert("failed to add row:" + (err.response?.data.error || "unknown error"));
+    }
+  };
+
+  const handleSaveTable = async () => {
+    try {
+      const hasnewrow = Object.values(newRow).some((val) => val.trim() !== "");
+      let updatedRow = [...rows];
+      if (hasnewrow) {
+        const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
+        updatedRow.push(res.data);
+        setRows(updatedRow);
+        setNewRow({});
+      }
+      const saveres = await axios.put(
+        `http://localhost:5000/table/${table._id}`,
+        {
+          ...table,
+          rows: updatedRow,
+        },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+      alert("Table saved successfully");
+      setEditMode(false);
+      setTable(saveres.data);
+    } catch (err) {
+      console.log("save error:", err);
+      alert("failed to save table");
+    }
+  };
+
+  const handleAddColumn = () => {
+    const newColumnName = prompt("Enter new column name:");
+    if (!newColumnName) return;
+    const updatedColumns = [...table.columns, newColumnName];
+    setTable({ ...table, columns: updatedColumns });
+    const updatedRows = rows.map((row) => ({
+      ...row,
+      rowData: {
+        ...row.rowData,
+        [newColumnName]: "",
+      },
+    }));
+    setRows(updatedRows);
+    setNewRow({ ...newRow, [newColumnName]: "" });
+    setColumnTypes([...columnTypes, "Text"]);
+  };
+
+  if (!table) return <p className="text-center mt-10">Loading Table...</p>;
+
+  if (!editMode) {
+    return (
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">
+          {table.tableName}
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="table-auto border-collapse border border-blue-700 w-full">
+            <thead>
+              <tr>
+                {table.columns.map((col, i) => (
+                  <th key={i} className="border border-blue-700 px-4 py-2 bg-blue-100">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, idx) => (
+                <tr key={row._id || idx}>
+                  {table.columns.map((col, i) => (
+                    <td key={i} className="border px-4 py-2 text-center">
+                      {row.rowData[col] || ""}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex justify-center mt-5">
+          <button
+            onClick={() => setEditMode(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Edit Table
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <TableView
+      table={table}
+      rows={rows}
+      newRow={newRow}
+      editedRow={editedRow}
+      editingRow={editingRow}
+      handleEditRow={handleEditRow}
+      handlesaverow={handleSaveRow}
+      seteditingRow={setEditingRow}
+      handledetelerow={handleDeleteRow}
+      handleChangeNewRow={handleChangeNewRow}
+      handlechangeeditedrow={handleChangeEditedRow}
+      handleAddRow={handleAddRow}
+      handleAddColumn={handleAddColumn}
+      handlesaveTable={handleSaveTable}
+      columnTypes={columnTypes}
+      setColumnTypes={setColumnTypes}
+      showActions={true}
+    />
+  );
+};
+
+export default TableDetail;

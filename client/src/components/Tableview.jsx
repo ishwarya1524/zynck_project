@@ -13,6 +13,7 @@ const TableView = ({
   handleChangeNewRow,
   handlechangeeditedrow,
   handleAddRow,
+  handleDeleteColumn,
   handleAddColumn,
   handlesaveTable,
   columnTypes,
@@ -30,15 +31,18 @@ const TableView = ({
   return (
     <div className="flex flex-col justify-center min-h-screen items-center overflow-x-auto  w-full">
       <div className="w-full flex flex-col gap-3 justify-evenly">
+      <div className="flex flex-col justify-center items-center">
         <h2 className="text-blue-400 font-bold text-3xl mb-5 text-center">
           {table.tableName}
         </h2>
+        <button className="bg-gradient-to-r from-blue-400 to-purple-500 w-1/6 p-2 rounded-full cursor-pointer text-white font-bold hover:scale-105 transition ease-in-out duration:1000 ">Download</button>
+        </div>
 
         <table className="table-auto border border-collapse w-full bg-white">
           <thead>
             <tr>
               {table.columns.map((col, idx) => (
-                <th key={idx} className="border-2 border-blue-900 p-2">
+                <th key={idx} className="border-2 border-blue-900 p-2 relative group hover:bg-blue-200 cursor-pointer">
                   {col}
                   <select
                     className=" rounded  ml-3 bg-gray-200 p-2"
@@ -68,6 +72,14 @@ const TableView = ({
                     <option value="Time">Time</option>
                     <option value="Color">Color</option>
                   </select>
+                  <button
+                    onClick={() => handleDeleteColumn(idx)}
+                    className="absolute top-1 right-1 bg-red-500 text-white font-bold rounded-full h-4 w-4 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 hover:bg-red-600 transition"
+
+                    title="Delete Column"
+                  >
+                    &times;
+                  </button>
                 </th>
               ))}
               {showActions && (
@@ -133,13 +145,13 @@ const TableView = ({
                       <>
                         <button
                           onClick={() => handlesaverow(idx)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
+                          className="bg-blue-500 text-white px-3 py-1 rounded mr-2 cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
                         >
                           Save
                         </button>
                         <button
                           onClick={() => seteditingRow(null)}
-                          className="bg-blue-800 text-white px-3 py-1 rounded"
+                          className="bg-blue-800 text-white px-3 py-1 rounded cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
                         >
                           Cancel
                         </button>
@@ -148,13 +160,13 @@ const TableView = ({
                       <div className="">
                         <button
                           onClick={() => handleEditRow(idx)}
-                          className="bg-blue-400 text-white px-3 py-1 rounded mr-2"
+                          className="bg-blue-400 text-white px-3 py-1 rounded mr-2 cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handledetelerow(idx)}
-                          className="bg-red-400 px-3 py-1 rounded text-white"
+                          className="bg-red-400 px-3 py-1 rounded text-white cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
                         >
                           Delete
                         </button>
@@ -219,18 +231,18 @@ const TableView = ({
           <div className="flex justify-evenly mt-5 mx-8">
             <button
               onClick={handleAddRow}
-              className="bg-blue-900 px-2 py-3 rounded text-white w-1/7 cursor-pointer"
+              className="bg-blue-900 px-2 py-3 rounded text-white w-1/7 cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
             >
               + Add Row
             </button>
             <button
-              className="bg-blue-900 px-2 py-3 rounded text-white w-1/7 cursor-pointer"
+              className="bg-blue-900 px-2 py-3 rounded text-white w-1/7 cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
               onClick={handleAddColumn}
             >
               + Add Column
             </button>
             <button
-              className="bg-green-900 px-2 py-3 rounded text-white w-1/7 cursor-pointer"
+              className="bg-green-900 px-2 py-3 rounded text-white w-1/7 cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
               onClick={handlesaveTable}
             >
               Save
@@ -279,13 +291,13 @@ const TableView = ({
 
               <div className="flex justify-end gap-4">
                 <button
-                  className="bg-red-500 text-white px-4 py-2 rounded"
+                  className="bg-red-500 text-white px-4 py-2 rounded cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
                   onClick={() => setShowoptionmodel(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:scale-105 transition ease-in-out duration:1000"
                   onClick={() => {
                     setcolumnoptions((prev) => ({
                       ...prev,
