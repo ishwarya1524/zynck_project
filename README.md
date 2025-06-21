@@ -17,17 +17,17 @@ Wonderful UI with Tailwindcss
 
 ## Different Datatypes to work with
 
--> Text
--> Number
--> Email
--> Boolean
--> Date
--> Telephone
--> Dropdown
--> Radio
--> Password
--> Time
--> Color
+- Text
+- Number
+- Email
+- Boolean
+- Date
+- Telephone
+- Dropdown
+- Radio
+- Password
+- Time
+- Color
 
 ## Tech Stack
 
