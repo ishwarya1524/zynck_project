@@ -17,7 +17,9 @@ const TableView = ({
   handleAddColumn,
   handlesaveTable,
   columnTypes,
+  downloadpdf,
   setColumnTypes,
+  downloadCSV,
   showActions = true,
 }) => {
   const [showoptionmodel, setShowoptionmodel] = useState(false);
@@ -35,7 +37,10 @@ const TableView = ({
         <h2 className="text-blue-400 font-bold text-3xl mb-5 text-center">
           {table.tableName}
         </h2>
-        <button className="bg-gradient-to-r from-blue-400 to-purple-500 w-1/6 p-2 rounded-full cursor-pointer text-white font-bold hover:scale-105 transition ease-in-out duration:1000 ">Download</button>
+        <div className="flex justify-center items-center gap-3 w-full">
+        <button className="bg-gradient-to-r from-blue-400 to-purple-500 w-1/6 p-2 rounded-full cursor-pointer text-white font-bold hover:scale-105 transition ease-in-out duration-1000" onClick={()=>downloadCSV(table.tableName,table.columns,rows)}>Download as CSV</button>
+        <button className="bg-gradient-to-r from-blue-400 to-purple-500 w-1/6 p-2 rounded-full cursor-pointer text-white font-bold hover:scale-105 transition ease-in-out duration-1000" onClick={()=>downloadpdf(table.tableName,table.columns,rows)}>Download as pdf</button>
+        </div>
         </div>
 
         <table className="table-auto border border-collapse w-full bg-white">

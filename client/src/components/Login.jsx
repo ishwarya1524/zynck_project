@@ -46,7 +46,7 @@ return (
     <div className='flex flex-col gap-2'>
     <button type='submit' className='bg-gradient-to-r from-blue-300 to-blue-900 p-3 w-90 rounded-full text-white font-bold shadow-md hover: cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl '>Login
     </button>
-    <button type='submit' className='bg-gradient-to-r from-blue-300 to-blue-900 p-3 w-90 rounded-full text-white font-bold shadow-md hover: cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl mt-0 '>Sign in with google</button>
+    
     </div>
   </form>
   </div>

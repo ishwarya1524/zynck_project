@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import TableView from "./Tableview";
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 const TableDetail = () => {
   const { id } = useParams();
@@ -118,11 +120,9 @@ const TableDetail = () => {
   };
 
   const handleDeleteColumn = (colIndex) => {
-    // Remove column name from the table's columns
     const updatedColumns = [...table.columns];
     const removedColumn = updatedColumns.splice(colIndex, 1)[0];
   
-    // Update each row to remove the column's data
     const updatedRows = rows.map((row) => {
       const updatedRowData = { ...row.rowData };
       delete updatedRowData[removedColumn];
@@ -132,11 +132,9 @@ const TableDetail = () => {
       };
     });
   
-    // Update column types to remove the deleted one
     const updatedColumnTypes = [...columnTypes];
     updatedColumnTypes.splice(colIndex, 1);
   
-    // Update the states
     setTable((prev) => ({ ...prev, columns: updatedColumns }));
     setRows(updatedRows);
     setColumnTypes(updatedColumnTypes);
@@ -160,6 +158,74 @@ const TableDetail = () => {
       alert("failed to add row:" + (err.response?.data.error || "unknown error"));
     }
   };
+
+const downloadCSV=(tableName,columns,rows)=>{
+  if(!columns?.length || !rows?.length){
+    alert("No data available");
+    return;
+  }
+  const csvrows=[columns.join(",")];
+  rows.forEach((row)=>{
+    const rowData=columns.map((col)=>{
+      const value=row?.rowData?.[col]??"";
+      return `"${value.toString().replace(/"/g,'""')}"`;
+    });
+    csvrows.push(rowData.join(","));
+  })
+  const csvstring=csvrows.join("\n");
+  const blob=new Blob([csvstring],{type:"text/csv;charset=utf-8,"})
+  const url=URL.createObjectURL(blob);
+
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=`${tableName || "table"}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+  
+
+const downloadpdf = (tableName, columns, rows) => {
+  console.log("PDF Download Triggered 🚀");
+
+  if (!columns?.length || !rows?.length) {
+    alert("No data available");
+    return;
+  }
+
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(tableName || "Table", 14, 20);
+
+  const tableData = rows.map((row) =>
+    columns.map((col) => row?.rowData?.[col] ?? "")
+  );
+
+  autoTable(doc,{
+    head: [columns],
+    body: tableData,
+    startY: 30,
+    theme: 'grid',
+    headStyles: { 
+      fillColor: [255,255,255],
+      textColor:0,
+      lineColor:[0,0,0],
+      lineWidth:0.1,
+      fontStyle:"bold",
+      halign:"center", },
+      bodyStyles:{
+        textColor:20,
+        halign:'center',
+        lineColor:[0,0,0],
+      lineWidth:0.1,
+      }
+  });
+
+  doc.save(`${tableName?.replace(/\s+/g, "_") || "table"}.pdf`);
+};
+
+
 
   const handleSaveTable = async () => {
     try {
@@ -273,7 +339,9 @@ const TableDetail = () => {
       handleAddColumn={handleAddColumn}
       handlesaveTable={handleSaveTable}
       columnTypes={columnTypes}
+      downloadpdf={downloadpdf}
       setColumnTypes={setColumnTypes}
+      downloadCSV={downloadCSV}
       showActions={true}
     />
   );
