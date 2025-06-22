@@ -9,6 +9,7 @@ User authentication with JWT
 Create Tables with dynamic columns (text,dropdown,checkbox,etc.,)
 Add,edit,delete rows
 add, delete columns
+able to download tables as csv and pdf files
 Able to edit already saved Tables
 Save tables to MongoDb
 Secure APIs with token-based authorization
