@@ -33,7 +33,7 @@ function App() {
   }, [newRow]);
   const handleCreateTable = async () => {
     try {
-      const res = await axios.post('https://zynck-project-1.onrender.com/table', {
+      const res = await axios.post('http://localhost:5000/table', {
         tableName,
         columns,
       }, {
@@ -86,7 +86,7 @@ function App() {
     }
 
     try {
-      const res = await axios.post(`https://zynck-project-1.onrender.com/tables/${table._id}/rows`, newRow);
+      const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
       setRows([...rows, res.data]);
       setNewRow({});
     } catch (err) {
@@ -126,7 +126,7 @@ function App() {
 
       }
       const res = await axios.put(
-        `https://zynck-project-1.onrender.com/${table._id}/rows/${currentRow._id}`,
+        `http://localhost:5000/tables/${table._id}/rows/${currentRow._id}`,
         { rowData: cleanedRow }
       );
       const updataedRow = [...rows];
@@ -143,7 +143,7 @@ function App() {
   const handledetelerow = async (idx) => {
     const rowId = rows[idx]._id;
     try {
-      await axios.delete(`https://zynck-project-1.onrender.com/tables/${table._id}/rows/${rowId}`);
+      await axios.delete(`http://localhost:5000/tables/${table._id}/rows/${rowId}`);
       setRows(rows.filter((_, i) => i !== idx));
     }
     catch (err) {
@@ -191,12 +191,12 @@ function App() {
       let updatedRow = [...rows]
 
       if (hasnewrow) {
-        const res = await axios.post(`https://zynck-project-1.onrender.com/tables/${table._id}/rows`, newRow);
+        const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
         updatedRow.push(res.data);
         setRows(updatedRow);
         setNewRow({});
       }
-      const saveres = await axios.put(`https://zynck-project-1.onrender.com/table/${table._id}`, {
+      const saveres = await axios.put(`http://localhost:5000/table/${table._id}`, {
         ...table,
         rows: updatedRow,
       }, {
@@ -238,7 +238,7 @@ function App() {
     const fetchTableAndRows = async () => {
       if (table && table._id) {
         try {
-          const res = await axios.get(`https://zynck-project-1.onrender.com/tables/${table._id}`);
+          const res = await axios.get(`http://localhost:5000/tables/${table._id}`);
           setTable(res.data.table);
           setRows(res.data.rows);
         }

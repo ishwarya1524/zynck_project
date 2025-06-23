@@ -24,7 +24,7 @@ const TableDetail = () => {
       }
 
       try {
-        const res = await axios.get(`https://zynck-project-1.onrender.com/table/${id}`, {
+        const res = await axios.get(`http://localhost:5000/table/${id}`, {
           headers: { Authorization: `${token}` },
         });
         setTable(res.data);
@@ -95,7 +95,7 @@ const TableDetail = () => {
         cleanedRow[col] = editedRow[col] || "";
       }
       const res = await axios.put(`
-        https://zynck-project-1.onrender.com/tables/${table._id}/rows/${currentRow._id}`,
+        http://localhost:5000/tables/${table._id}/rows/${currentRow._id}`,
         { rowData: cleanedRow }
       );
       const updatedRows = [...rows];
@@ -111,7 +111,7 @@ const TableDetail = () => {
   const handleDeleteRow = async (idx) => {
     const rowId = rows[idx]._id;
     try {
-      await axios.delete(`https://zynck-project-1.onrender.com/tables/${table._id}/rows/${rowId}`);
+      await axios.delete(`http://localhost:5000/tables/${table._id}/rows/${rowId}`);
       setRows(rows.filter((_, i) => i !== idx));
     } catch (err) {
       console.error("error deleting row", err);
@@ -150,7 +150,7 @@ const TableDetail = () => {
       }
     }
     try {
-      const res = await axios.post(`https://zynck-project-1.onrender.com/tables/${table._id}/rows`, newRow);
+      const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
       setRows([...rows, res.data]);
       setNewRow({});
     } catch (err) {
@@ -232,13 +232,13 @@ const downloadpdf = (tableName, columns, rows) => {
       const hasnewrow = Object.values(newRow).some((val) => val.trim() !== "");
       let updatedRow = [...rows];
       if (hasnewrow) {
-        const res = await axios.post(`https://zynck-project-1.onrender.com/tables/${table._id}/rows`, newRow);
+        const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
         updatedRow.push(res.data);
         setRows(updatedRow);
         setNewRow({});
       }
       const saveres = await axios.put(
-        `https://zynck-project-1.onrender.com/table/${table._id}`,
+        `http://localhost:5000/table/${table._id}`,
         {
           ...table,
           rows: updatedRow,
