@@ -12,7 +12,7 @@ const Register = () => {
     const handlesubmit= async(e)=>{
         e.preventDefault();
         try{
-            await axios.post("http://localhost:5000/api/auth/register",form);
+            await axios.post("https://zynck-project-2.onrender.com/api/auth/register",form);
             alert("Registration Successful")
             navigate("/login")
         }

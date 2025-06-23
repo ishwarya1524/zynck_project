@@ -12,7 +12,7 @@ const Dashboard = () => {
     const confirmDelete = window.confirm("Are you sure you want to delete this table?");
   if (!confirmDelete) return;
     try{
-      await axios.delete(`http://localhost:5000/tables/${id}`);
+      await axios.delete(`https://zynck-project-2.onrender.com/tables/${id}`);
       setTables(prev=>prev.filter(t=>t._id!==id));
     }
     catch(err){
@@ -27,7 +27,7 @@ const Dashboard = () => {
       return navigate("/login");
     }
 
-    axios.get("http://localhost:5000/tables", {
+    axios.get("https://zynck-project-2.onrender.com/tables", {
       headers: { Authorization: `${token}` }
     })
     .then(res => {
