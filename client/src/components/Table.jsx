@@ -1,6 +1,8 @@
 import axios from "axios"
 import { useState, useEffect } from "react"
-import TableView from "./Tableview"; './Tableview'
+import TableView from "./Tableview";
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 function App() {
   const [tableName, setTableName] = useState('');
@@ -33,7 +35,7 @@ function App() {
   }, [newRow]);
   const handleCreateTable = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/table', {
+      const res = await axios.post('https://zynck-project-2.onrender.com/table', {
         tableName,
         columns,
       }, {
@@ -86,7 +88,7 @@ function App() {
     }
 
     try {
-      const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
+      const res = await axios.post(`https://zynck-project-2.onrender.com/tables/${table._id}/rows`, newRow);
       setRows([...rows, res.data]);
       setNewRow({});
     } catch (err) {
@@ -126,7 +128,7 @@ function App() {
 
       }
       const res = await axios.put(
-        `http://localhost:5000/tables/${table._id}/rows/${currentRow._id}`,
+        `https://zynck-project-2.onrender.com/tables/${table._id}/rows/${currentRow._id}`,
         { rowData: cleanedRow }
       );
       const updataedRow = [...rows];
@@ -140,10 +142,78 @@ function App() {
     }
   }
 
+const downloadCSV=(tableName,columns,rows)=>{
+  if(!columns?.length || !rows?.length){
+    alert("No data available");
+    return;
+  }
+  const csvrows=[columns.join(",")];
+  rows.forEach((row)=>{
+    const rowData=columns.map((col)=>{
+      const value=row?.rowData?.[col]??"";
+      return `"${value.toString().replace(/"/g,'""')}"`;
+    });
+    csvrows.push(rowData.join(","));
+  })
+  const csvstring=csvrows.join("\n");
+  const blob=new Blob([csvstring],{type:"text/csv;charset=utf-8,"})
+  const url=URL.createObjectURL(blob);
+
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=`${tableName || "table"}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+  
+
+const downloadpdf = (tableName, columns, rows) => {
+  console.log("PDF Download Triggered 🚀");
+
+  if (!columns?.length || !rows?.length) {
+    alert("No data available");
+    return;
+  }
+
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(tableName || "Table", 14, 20);
+
+  const tableData = rows.map((row) =>
+    columns.map((col) => row?.rowData?.[col] ?? "")
+  );
+
+  autoTable(doc,{
+    head: [columns],
+    body: tableData,
+    startY: 30,
+    theme: 'grid',
+    headStyles: { 
+      fillColor: [255,255,255],
+      textColor:0,
+      lineColor:[0,0,0],
+      lineWidth:0.1,
+      fontStyle:"bold",
+      halign:"center", },
+      bodyStyles:{
+        textColor:20,
+        halign:'center',
+        lineColor:[0,0,0],
+      lineWidth:0.1,
+      }
+  });
+
+  doc.save(`${tableName?.replace(/\s+/g, "_") || "table"}.pdf`);
+};
+
+
+
   const handledetelerow = async (idx) => {
     const rowId = rows[idx]._id;
     try {
-      await axios.delete(`http://localhost:5000/tables/${table._id}/rows/${rowId}`);
+      await axios.delete(`https://zynck-project-2.onrender.com/tables/${table._id}/rows/${rowId}`);
       setRows(rows.filter((_, i) => i !== idx));
     }
     catch (err) {
@@ -191,12 +261,12 @@ function App() {
       let updatedRow = [...rows]
 
       if (hasnewrow) {
-        const res = await axios.post(`http://localhost:5000/tables/${table._id}/rows`, newRow);
+        const res = await axios.post(`https://zynck-project-2.onrender.com/tables/${table._id}/rows`, newRow);
         updatedRow.push(res.data);
         setRows(updatedRow);
         setNewRow({});
       }
-      const saveres = await axios.put(`http://localhost:5000/table/${table._id}`, {
+      const saveres = await axios.put(`https://zynck-project-2.onrender.com/table/${table._id}`, {
         ...table,
         rows: updatedRow,
       }, {
@@ -238,7 +308,7 @@ function App() {
     const fetchTableAndRows = async () => {
       if (table && table._id) {
         try {
-          const res = await axios.get(`http://localhost:5000/tables/${table._id}`);
+          const res = await axios.get(`https://zynck-project-2.onrender.com/tables/${table._id}`);
           setTable(res.data.table);
           setRows(res.data.rows);
         }
@@ -310,6 +380,8 @@ function App() {
           handleDeleteColumn={handleDeleteColumn}
           handlesaveTable={handlesaveTable}
           columnTypes={columnTypes}
+          downloadCSV={downloadCSV}
+          downloadpdf={downloadpdf}
           setColumnTypes={setColumnTypes}
         />
       )}
