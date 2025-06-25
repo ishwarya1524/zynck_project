@@ -83,7 +83,8 @@ function App() {
     for (let col of table.columns) {
       const value = newRow[col] || ""
       if (!validateInput(col, value)) {
-        alert(`Invalid input for column "${col}" of type "${columnTypes[table.columns.indexOf(col)]}`)
+        alert(`Invalid input for column "${col}" of type "${columnTypes[table.columns.indexOf(col)]}`);
+        return;
       };
     }
 
