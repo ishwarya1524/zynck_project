@@ -325,7 +325,8 @@ const downloadpdf = (tableName, columns, rows) => {
       {!table ? (
         <>
           <h2 className="text-blue-700 font-bold text-3xl mb-7">Welcome, {user?.name}</h2>
-          <div className="flex flex-col justify-center items-center border-2 w-1/2 rounded-md gap-3 shadow-lg bg-white">
+          <div className="flex flex-col justify-center items-center border-2 w-full sm:w-4/5 md:w-1/2 rounded-md gap-3 shadow-lg bg-white p-4">
+
             <h2 className="text-blue-500 text-2xl font-bold mt-3">Create a Table</h2>
             <input
               value={tableName}
